@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AmazonScraper — Product Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+</head>
+<body class="index-page">
+
+  <!-- Animated background grid -->
+  <div class="bg-grid"></div>
+  <div class="bg-glow glow-1"></div>
+  <div class="bg-glow glow-2"></div>
+
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="brand-icon">◈</span>
+      <span class="brand-name">AmazonScraper</span>
+    </div>
+    <div class="nav-links">
+      <a href="/" class="nav-link active">Search</a>
+      <a href="/history" class="nav-link">History</a>
+      <a href="/api/products" class="nav-link" target="_blank">API</a>
+    </div>
+  </nav>
+
+  <main class="hero">
+
+    <div class="hero-badge">
+      <span class="badge-dot"></span>
+      Live Amazon Intelligence
+    </div>
+
+    <h1 class="hero-title">
+      Discover &amp; Analyse<br/>
+      <span class="title-accent">Any Product</span>
+    </h1>
+
+    <p class="hero-sub">
+      Scrape Amazon in real-time. Get AI-style summaries, pros &amp; cons,<br/>
+      price tiers, and direct product links — exported in seconds.
+    </p>
+
+    <!-- ── Search Form ─────────────────────────────── -->
+    <form action="/search" method="POST" class="search-form" id="searchForm">
+
+      <div class="search-bar-wrap">
+        <span class="search-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </span>
+        <input
+          type="text"
+          name="query"
+          class="search-input"
+          placeholder="Search Amazon… e.g. wireless earbuds, gaming laptop"
+          autocomplete="off"
+          required
+        />
+        <button type="submit" class="search-btn" id="submitBtn">
+          <span class="btn-text">Scrape Now</span>
+          <span class="btn-arrow">→</span>
+        </button>
+      </div>
+
+      <!-- ── Advanced options ──────────────────────── -->
+      <div class="options-grid">
+
+        <div class="option-card">
+          <label class="option-label">Max Products</label>
+          <div class="select-wrap">
+            <select name="max_products" class="option-select">
+              <option value="3">3 products</option>
+              <option value="5" selected>5 products</option>
+              <option value="10">10 products</option>
+              <option value="20">20 products</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="option-card">
+          <label class="option-label">Pages to Scan</label>
+          <div class="select-wrap">
+            <select name="pages" class="option-select">
+              <option value="1" selected>1 page</option>
+              <option value="2">2 pages</option>
+              <option value="3">3 pages</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="option-card">
+          <label class="option-label">Currency</label>
+          <div class="select-wrap">
+            <select name="currency" class="option-select">
+              <option value="INR" selected>₹ INR</option>
+              <option value="USD">$ USD</option>
+              <option value="GBP">£ GBP</option>
+              <option value="EUR">€ EUR</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="option-card export-card">
+          <label class="option-label">Export Formats</label>
+          <div class="checkbox-row">
+            <label class="check-label">
+              <input type="checkbox" name="export" value="csv" checked/>
+              <span class="check-box"></span> CSV
+            </label>
+            <label class="check-label">
+              <input type="checkbox" name="export" value="json" checked/>
+              <span class="check-box"></span> JSON
+            </label>
+            <label class="check-label">
+              <input type="checkbox" name="export" value="markdown"/>
+              <span class="check-box"></span> MD
+            </label>
+          </div>
+        </div>
+
+      </div>
+    </form>
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+      <div class="loading-box">
+        <div class="spinner"></div>
+        <p class="loading-title">Scraping Amazon…</p>
+        <p class="loading-sub">Fetching products, extracting data &amp; building summaries</p>
+        <div class="loading-steps">
+          <span class="step active" id="s1">Searching</span>
+          <span class="step-sep">›</span>
+          <span class="step" id="s2">Extracting</span>
+          <span class="step-sep">›</span>
+          <span class="step" id="s3">Summarising</span>
+          <span class="step-sep">›</span>
+          <span class="step" id="s4">Done</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Feature pills -->
+    <div class="feature-pills">
+      <span class="pill">✦ AI Summaries</span>
+      <span class="pill">✦ Pros &amp; Cons</span>
+      <span class="pill">✦ Price Tiers</span>
+      <span class="pill">✦ Direct Links</span>
+      <span class="pill">✦ SQLite Storage</span>
+      <span class="pill">✦ CSV · JSON · MD</span>
+    </div>
+
+  </main>
+
+  <script>
+    const form = document.getElementById('searchForm');
+    const overlay = document.getElementById('loadingOverlay');
+    const steps = ['s1','s2','s3','s4'];
+    let stepIdx = 0;
+
+    form.addEventListener('submit', () => {
+      overlay.classList.add('visible');
+      // Animate loading steps
+      const interval = setInterval(() => {
+        stepIdx++;
+        if (stepIdx < steps.length) {
+          document.getElementById(steps[stepIdx]).classList.add('active');
+        } else {
+          clearInterval(interval);
+        }
+      }, 2200);
+    });
+  </script>
+
+</body>
+</html>

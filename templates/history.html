@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>History | AmazonScraper</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+</head>
+<body class="results-page">
+
+  <div class="bg-grid"></div>
+
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="brand-icon">◈</span>
+      <span class="brand-name">AmazonScraper</span>
+    </div>
+    <div class="nav-links">
+      <a href="/" class="nav-link">← Search</a>
+      <a href="/history" class="nav-link active">History</a>
+      <a href="/api/products" class="nav-link" target="_blank">API</a>
+    </div>
+  </nav>
+
+  <div class="results-container">
+
+    <div class="results-header">
+      <div>
+        <div class="results-badge">Database</div>
+        <h1 class="results-title">
+          <span class="count-accent">{{ rows|length }}</span> Stored Products
+        </h1>
+      </div>
+    </div>
+
+    {% if rows %}
+    <div class="section-block">
+      <div class="table-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>#</th><th>ASIN</th><th>Title</th>
+              <th>Price</th><th>Rating</th><th>Scraped</th><th>Link</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in rows %}
+            <tr>
+              <td class="td-num">{{ loop.index }}</td>
+              <td><code class="asin-badge">{{ r.asin }}</code></td>
+              <td class="td-title">{{ r.short_title }}</td>
+              <td class="td-price">{{ r.price or '–' }}</td>
+              <td class="td-rating">
+                {% if r.rating %}<span class="star">★</span> {{ r.rating.split(' ')[0] }}{% else %}–{% endif %}
+              </td>
+              <td class="td-muted" style="font-size:11px">{{ r.scraped_at[:16] if r.scraped_at else '–' }}</td>
+              <td>
+                <a href="{{ r.product_url }}" target="_blank" class="table-link">View ↗</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <p class="empty-icon">◎</p>
+      <p class="empty-text">No products scraped yet.</p>
+      <a href="/" class="back-big-btn">Start Scraping →</a>
+    </div>
+    {% endif %}
+
+  </div>
+</body>
+</html>

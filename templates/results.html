@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Results — {{ query }} | AmazonScraper</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}"/>
+</head>
+<body class="results-page">
+
+  <div class="bg-grid"></div>
+
+  <!-- ── Navbar ──────────────────────────────────────── -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <span class="brand-icon">◈</span>
+      <span class="brand-name">AmazonScraper</span>
+    </div>
+    <div class="nav-links">
+      <a href="/" class="nav-link">← New Search</a>
+      <a href="/history" class="nav-link">History</a>
+      <a href="/api/products" class="nav-link" target="_blank">API</a>
+    </div>
+  </nav>
+
+  <div class="results-container">
+
+    <!-- ── Header ──────────────────────────────────── -->
+    <div class="results-header">
+      <div>
+        <div class="results-badge">Results</div>
+        <h1 class="results-title">
+          {% if summaries %}
+            <span class="count-accent">{{ summaries|length }}</span> products found
+          {% else %}
+            No results
+          {% endif %}
+          for <span class="query-accent">"{{ query }}"</span>
+        </h1>
+      </div>
+      <a href="/" class="back-btn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+        New Search
+      </a>
+    </div>
+
+    <!-- ── Error ───────────────────────────────────── -->
+    {% if error %}
+    <div class="error-banner">
+      <span class="error-icon">⚠</span>
+      <span>{{ error }}</span>
+    </div>
+    {% endif %}
+
+    {% if summaries %}
+
+    <!-- ── Stats bar ───────────────────────────────── -->
+    <div class="stats-bar">
+      <div class="stat-chip">
+        <span class="stat-num">{{ summaries|length }}</span>
+        <span class="stat-lbl">Products</span>
+      </div>
+      {% set rated = summaries|selectattr('rating')|list %}
+      <div class="stat-chip">
+        <span class="stat-num">{{ rated|length }}</span>
+        <span class="stat-lbl">Rated</span>
+      </div>
+      {% set in_stock = summaries|selectattr('availability')|list %}
+      <div class="stat-chip">
+        <span class="stat-num">{{ in_stock|length }}</span>
+        <span class="stat-lbl">Tracked</span>
+      </div>
+      {% if exported_files %}
+      <div class="stat-chip">
+        <span class="stat-num">{{ exported_files|length }}</span>
+        <span class="stat-lbl">Exported</span>
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- ── Quick Links ─────────────────────────────── -->
+    <div class="section-block">
+      <h2 class="section-title">
+        <span class="section-icon">⚡</span> Quick Links
+      </h2>
+      <div class="quick-links-grid">
+        {% for s in summaries %}
+        <a href="{{ s.product_url }}" target="_blank" class="quick-link-chip">
+          <span class="chip-num">{{ loop.index }}</span>
+          <span class="chip-title">{{ s.short_title }}</span>
+          {% if s.price %}
+          <span class="chip-price">{{ s.price }}</span>
+          {% endif %}
+          <span class="chip-arrow">↗</span>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- ── Product Cards ───────────────────────────── -->
+    <div class="section-block">
+      <h2 class="section-title">
+        <span class="section-icon">◈</span> Product Cards
+      </h2>
+
+      <div class="cards-grid">
+        {% for s in summaries %}
+        <div class="product-card" style="animation-delay: {{ loop.index0 * 0.07 }}s">
+
+          <!-- Card header -->
+          <div class="card-header">
+            <div class="card-meta">
+              <span class="asin-badge">{{ s.asin }}</span>
+              <span class="tier-badge tier-{{ s.price_tier|lower|replace('-','') }}">
+                {{ s.price_tier }}
+              </span>
+            </div>
+            {% if s.availability %}
+            <span class="avail-dot {% if 'stock' in s.availability|lower and 'out' not in s.availability|lower %}avail-green{% else %}avail-red{% endif %}"></span>
+            {% endif %}
+          </div>
+
+          <!-- Title -->
+          <h3 class="card-title">{{ s.short_title }}</h3>
+
+          <!-- Price + Rating -->
+          <div class="card-price-row">
+            {% if s.price %}
+            <span class="card-price">{{ s.price }}</span>
+            {% else %}
+            <span class="card-price muted">Price N/A</span>
+            {% endif %}
+            {% if s.rating %}
+            <span class="card-rating">
+              <span class="star">★</span>
+              {{ s.rating.split(' ')[0] }}
+              {% if s.review_count %}
+              <span class="review-count">({{ s.review_count }})</span>
+              {% endif %}
+            </span>
+            {% endif %}
+          </div>
+
+          <!-- Summary -->
+          <div class="card-summary-block">
+            <p class="card-summary">{{ s.summary }}</p>
+          </div>
+
+          <!-- Highlights -->
+          {% if s.highlights %}
+          <div class="card-highlights">
+            <p class="highlights-label">Highlights</p>
+            <ul class="highlights-list">
+              {% for h in s.highlights %}
+              <li>{{ h }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          <!-- Pros / Cons -->
+          <div class="pros-cons-row">
+            {% if s.pros %}
+            <div class="pros-col">
+              <p class="pc-label pros-label">Pros</p>
+              <ul class="pc-list">
+                {% for p in s.pros %}
+                <li class="pro-item">{{ p }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+            {% endif %}
+            {% if s.cons %}
+            <div class="cons-col">
+              <p class="pc-label cons-label">Cons</p>
+              <ul class="pc-list">
+                {% for c in s.cons %}
+                <li class="con-item">{{ c }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+            {% endif %}
+          </div>
+
+          <!-- Verdict -->
+          {% if s.verdict %}
+          <div class="verdict-block">
+            <span class="verdict-icon">🏆</span>
+            <p class="verdict-text">{{ s.verdict }}</p>
+          </div>
+          {% endif %}
+
+          <!-- CTA -->
+          <a href="{{ s.product_url }}" target="_blank" class="view-btn">
+            View on Amazon
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- ── Comparison Table ────────────────────────── -->
+    <div class="section-block">
+      <h2 class="section-title">
+        <span class="section-icon">≡</span> Comparison Table
+      </h2>
+      <div class="table-wrap">
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Product</th>
+              <th>Price</th>
+              <th>Tier</th>
+              <th>Rating</th>
+              <th>Reviews</th>
+              <th>Link</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in summaries %}
+            <tr>
+              <td class="td-num">{{ loop.index }}</td>
+              <td class="td-title">{{ s.short_title }}</td>
+              <td class="td-price">{{ s.price or '–' }}</td>
+              <td>
+                <span class="tier-badge-sm tier-{{ s.price_tier|lower|replace('-','') }}">
+                  {{ s.price_tier }}
+                </span>
+              </td>
+              <td class="td-rating">
+                {% if s.rating %}
+                <span class="star">★</span> {{ s.rating.split(' ')[0] }}
+                {% else %}–{% endif %}
+              </td>
+              <td class="td-muted">{{ s.review_count or '–' }}</td>
+              <td>
+                <a href="{{ s.product_url }}" target="_blank" class="table-link">
+                  View ↗
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Exported Files ──────────────────────────── -->
+    {% if exported_files %}
+    <div class="section-block export-section">
+      <h2 class="section-title">
+        <span class="section-icon">↓</span> Exported Files
+      </h2>
+      <div class="export-list">
+        {% for f in exported_files %}
+        <div class="export-item">
+          <span class="export-icon">📄</span>
+          <span class="export-path">{{ f }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% endif %} {# end if summaries #}
+
+    <!-- Back button -->
+    <div class="back-row">
+      <a href="/" class="back-big-btn">← Search Again</a>
+    </div>
+
+  </div><!-- /results-container -->
+
+</body>
+</html>
