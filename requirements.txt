@@ -1,0 +1,9 @@
+Flask==2.3.4
+gunicorn==21.2.0
+requests==2.31.0
+beautifulsoup4==4.12.2
+lxml==4.9.3
+selenium==4.11.2
+pandas==2.1.1
+markdown==3.5.3
+dataclasses-json==0.5.7
