@@ -1,9 +1,22 @@
-Flask==2.3.4
-gunicorn==21.2.0
-requests==2.31.0
-beautifulsoup4==4.12.2
-lxml==4.9.3
-selenium==4.11.2
-pandas==2.1.1
-markdown==3.5.3
-dataclasses-json==0.5.7
+# ─────────────────────────────────────────────
+# requirements.txt — Amazon Scraper Flask App
+# ─────────────────────────────────────────────
+
+# Web framework
+Flask==3.1.0
+
+# Production WSGI server (replaces Flask dev server)
+gunicorn==22.0.0
+
+# HTTP scraping
+requests==2.32.3
+
+# HTML parsing
+beautifulsoup4==4.12.3
+lxml==5.2.2          # faster HTML parser for BeautifulSoup
+
+# Environment variable management
+python-dotenv==1.0.1
+
+# Date/time utilities (used internally by Flask)
+Werkzeug==3.1.3

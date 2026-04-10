@@ -119,6 +119,19 @@ def history():
     rows = load_from_db()
     return render_template("history.html", rows=rows)
 
+@app.route('/clear-history')
+def clear_history():
+    import os
+    from module3_storage_cli import init_db
+
+    try:
+        if os.path.exists("/tmp/products.db"):
+            os.remove("/tmp/products.db")
+    except Exception as e:
+        return f"Error clearing database: {e}"
+
+    init_db()
+    return "History cleared successfully!"
 
 @app.route("/api/products")
 def api_products():
