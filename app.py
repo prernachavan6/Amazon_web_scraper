@@ -121,15 +121,20 @@ def history():
 
 @app.route('/clear-history')
 def clear_history():
-    import os
-    from module3_storage_cli import init_db
+    from flask import redirect, url_for
+    import sqlite3
+    from module3_storage_cli import DB_PATH
 
     try:
-        if os.path.exists("/tmp/products.db"):
-            os.remove("/tmp/products.db")
-    except Exception as e:
-        return f"Error clearing database: {e}"
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
 
-    init_db()
-    return "History cleared successfully!"
+        cursor.execute("DELETE FROM products")
+        conn.commit()
+        conn.close()
+
+    except Exception as e:
+        print("Clear history error:", e)
+
+    return redirect(url_for('history'))
 
