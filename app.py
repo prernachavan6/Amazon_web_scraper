@@ -133,13 +133,3 @@ def clear_history():
     init_db()
     return "History cleared successfully!"
 
-@app.route("/api/products")
-def api_products():
-    """Simple JSON API — returns all stored products."""
-    rows = load_from_db()
-    return jsonify(rows)
-
-
-# ── Entry point ─────────────────────────────────────────
-if __name__ == "__main__":
-    app.run(debug=True, port=5000)
