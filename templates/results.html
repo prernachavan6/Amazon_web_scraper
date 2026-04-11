@@ -252,23 +252,20 @@
     </div>
 
     <!-- ── Exported Files ──────────────────────────── -->
-    {% if exported_files %}
-    <div class="section-block export-section">
-      <h2 class="section-title">
-        <span class="section-icon">↓</span> Exported Files
-      </h2>
-      <div class="export-list">
-        {% for f in exported_files %}
-        <div class="export-item">
-          <span class="export-icon">📄</span>
-          <span class="export-path">{{ f }}</span>
-        </div>
-        {% endfor %}
-      </div>
-    </div>
-    {% endif %}
+   {% if exported_files %}
+  <div class="section-block export-section">
+    <h2 class="section-title">
+      <span class="section-icon">↓</span> Exported Files
+    </h2>
 
-    {% endif %} {# end if summaries #}
+    <a href="/download-all" class="download-btn">
+      ⬇ Download All Files
+    </a>
+
+  </div>
+{% endif %}
+
+{% endif %} {# end if summaries #}
 
     <!-- Back button -->
     <div class="back-row">
