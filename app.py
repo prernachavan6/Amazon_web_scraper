@@ -144,19 +144,40 @@ from flask import send_file
 
 @app.route('/download-all')
 def download_all():
-    zip_path = "amazon_scraper_output/all_exports.zip"
+    import zipfile
+    import os
+    from flask import send_file
+
+    folder = "amazon_scraper_output"
+    zip_path = os.path.join(folder, "exports.zip")
 
     try:
+        valid_ext = (".csv", ".json", ".md")
+
+        # Get only valid files
+        files = [
+            f for f in os.listdir(folder)
+            if f.endswith(valid_ext)
+            and not f.startswith('.')   # ignore hidden files
+        ]
+
+        # Sort by latest modified
+        files = sorted(
+            files,
+            key=lambda x: os.path.getmtime(os.path.join(folder, x)),
+            reverse=True
+        )[:3]   # only latest 3 files
+
+        # Create zip
         with zipfile.ZipFile(zip_path, 'w') as zipf:
-            for file in os.listdir("amazon_scraper_output"):
-                if file.endswith((".csv", ".json", ".md")):
-                    zipf.write(
-                        os.path.join("amazon_scraper_output", file),
-                        file
-                    )
+            for file in files:
+                full_path = os.path.join(folder, file)
+
+                # Extra safety check
+                if os.path.isfile(full_path) and file.endswith(valid_ext):
+                    zipf.write(full_path, file)
 
         return send_file(zip_path, as_attachment=True)
 
     except Exception as e:
-        return f"Error creating zip: {e}"
-
+        return f"Download error: {e}"
