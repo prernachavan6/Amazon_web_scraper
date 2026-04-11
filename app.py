@@ -138,3 +138,25 @@ def clear_history():
 
     return redirect(url_for('history'))
 
+import zipfile
+import os
+from flask import send_file
+
+@app.route('/download-all')
+def download_all():
+    zip_path = "amazon_scraper_output/all_exports.zip"
+
+    try:
+        with zipfile.ZipFile(zip_path, 'w') as zipf:
+            for file in os.listdir("amazon_scraper_output"):
+                if file.endswith((".csv", ".json", ".md")):
+                    zipf.write(
+                        os.path.join("amazon_scraper_output", file),
+                        file
+                    )
+
+        return send_file(zip_path, as_attachment=True)
+
+    except Exception as e:
+        return f"Error creating zip: {e}"
+
